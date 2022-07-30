@@ -13,6 +13,8 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
@@ -53,7 +55,13 @@ public class MainLayout extends AppLayout {
         sortBy.setItems("Popularity", "Newest first", "Oldest first");
         sortBy.setValue("Popularity");
 
-        Header header = new Header(toggle, viewTitle, new Span(), new Label(" Sort by"),sortBy);
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.add(new Label("Sort by:"),sortBy);
+        horizontalLayout.setPadding(true);
+        horizontalLayout.setMargin(false);
+        horizontalLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
+
+        Header header = new Header(toggle, viewTitle, horizontalLayout);
         header.addClassNames("view-header");
         return header;
     }
