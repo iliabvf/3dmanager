@@ -3,6 +3,7 @@ package com.example.application.views.models;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.OrderedList;
@@ -10,6 +11,7 @@ import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
@@ -20,6 +22,17 @@ import com.vaadin.flow.router.RouteAlias;
 public class ModelsView extends Main implements HasComponents, HasStyle {
 
     private OrderedList imageContainer;
+
+    static private ModelsView modelsView;
+    H2 header;
+
+    public H2 getHeader() {
+        return header;
+    }
+
+    static public ModelsView getModelsView() {
+        return modelsView;
+    }
 
     public ModelsView() {
         constructUI();
@@ -37,6 +50,7 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         imageContainer.add(new ModelsViewCard("Mountain at night",
                 "https://images.unsplash.com/photo-1562832135-14a35d25edef?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=815&q=80"));
 
+        modelsView = this;
     }
 
     private void constructUI() {
@@ -46,21 +60,26 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         container.addClassNames("items-center", "justify-between");
 
         VerticalLayout headerContainer = new VerticalLayout();
-        H2 header = new H2("Beautiful photos");
+
+//        TreeGrid treeGrid = MainLayout.getMainLayout().getChildren().filter(component -> component instanceof TreeGrid).findFirst();
+
+        header = new H2("Gallery");
+        header.setId("header");
         header.addClassNames("mb-0", "mt-xl", "text-3xl");
+
         Paragraph description = new Paragraph("Royalty free photos and pictures, courtesy of Unsplash");
         description.addClassNames("mb-xl", "mt-0", "text-secondary");
         headerContainer.add(header, description);
 
-        Select<String> sortBy = new Select<>();
-        sortBy.setLabel("Sort by");
-        sortBy.setItems("Popularity", "Newest first", "Oldest first");
-        sortBy.setValue("Popularity");
+//        Select<String> sortBy = new Select<>();
+//        sortBy.setLabel("Sort by");
+//        sortBy.setItems("Popularity", "Newest first", "Oldest first");
+//        sortBy.setValue("Popularity");
 
         imageContainer = new OrderedList();
         imageContainer.addClassNames("gap-m", "grid", "list-none", "m-0", "p-0");
 
-        container.add(header, sortBy);
+        container.add(header); //, sortBy);
         add(container, imageContainer);
 
     }

@@ -27,19 +27,21 @@ public class ModelsViewCard extends ListItem {
         header.addClassNames("text-xl", "font-semibold");
         header.setText("Title");
 
-        Span subtitle = new Span();
-        subtitle.addClassNames("text-s", "text-secondary");
-        subtitle.setText("Card subtitle");
+//        Span subtitle = new Span();
+//        subtitle.addClassNames("text-s", "text-secondary");
+//        subtitle.setText("Card subtitle");
 
-        Paragraph description = new Paragraph(
-                "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.");
-        description.addClassName("my-m");
+//        Paragraph description = new Paragraph(
+//                "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.");
+//        description.addClassName("my-m");
 
         Span badge = new Span();
         badge.getElement().setAttribute("theme", "badge");
         badge.setText("Label");
 
-        add(div, header, subtitle, description, badge);
+        add(div, header
+                //, subtitle, description
+                , badge);
 
     }
 }

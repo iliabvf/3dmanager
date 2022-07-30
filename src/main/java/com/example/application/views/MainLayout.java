@@ -5,15 +5,18 @@ import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.views.models.ModelsView;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Footer;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Header;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
+import org.apache.xmlbeans.impl.xb.xsdschema.WhiteSpaceDocument;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,11 +27,16 @@ import java.util.List;
 public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
+    static private MainLayout mainLayout;
+    static public MainLayout getMainLayout() {
+        return mainLayout;
+    }
 
     public MainLayout() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         addToDrawer(createDrawerContent());
+        mainLayout = this;
     }
 
     private Component createHeaderContent() {
@@ -40,7 +48,12 @@ public class MainLayout extends AppLayout {
         viewTitle = new H1();
         viewTitle.addClassNames("view-title");
 
-        Header header = new Header(toggle, viewTitle);
+        Select<String> sortBy = new Select<>();
+//        sortBy.setLabel("Sort by");
+        sortBy.setItems("Popularity", "Newest first", "Oldest first");
+        sortBy.setValue("Popularity");
+
+        Header header = new Header(toggle, viewTitle, new Span(), new Label(" Sort by"),sortBy);
         header.addClassNames("view-header");
         return header;
     }
@@ -108,7 +121,16 @@ public class MainLayout extends AppLayout {
 
         TreeGrid<Person> treeGrid = new TreeGrid<>();
         treeGrid.setItems(getStaff(null), this::getStaff);
-        treeGrid.addHierarchyColumn(Person::getFirstName).setHeader("First name");
+        treeGrid.addHierarchyColumn(Person::getFirstName).setHeader("Folders");
+        treeGrid.setSelectionMode(TreeGrid.SelectionMode.SINGLE);
+
+        treeGrid.addItemClickListener(new ComponentEventListener<ItemClickEvent<Person>>() {
+            @Override
+            public void onComponentEvent(ItemClickEvent<Person> personItemClickEvent) {
+                ModelsView.getModelsView().getHeader().setText(personItemClickEvent.getItem().getFirstName());
+            }
+        });
+
 //        treeGrid.addColumn(Person::getLastName).setHeader("Last name");
 //        treeGrid.addColumn(Person::getEmail).setHeader("Email");
 
