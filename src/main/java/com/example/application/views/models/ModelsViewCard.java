@@ -25,7 +25,7 @@ public class ModelsViewCard extends ListItem {
 
         Span header = new Span();
         header.addClassNames("text-xl", "font-semibold");
-        header.setText("Title");
+        header.setText(text);
 
 //        Span subtitle = new Span();
 //        subtitle.addClassNames("text-s", "text-secondary");
@@ -37,7 +37,7 @@ public class ModelsViewCard extends ListItem {
 
         Span badge = new Span();
         badge.getElement().setAttribute("theme", "badge");
-        badge.setText("Label");
+        badge.setText(text);
 
         add(div, header
                 //, subtitle, description

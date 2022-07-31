@@ -61,7 +61,7 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         File[] files = new File(parentFullPath).listFiles();
         for (File file : files) {
             if (!file.isDirectory()) {
-                imageContainer.add(new ModelsViewCard(file.getName(),
+                imageContainer.add(new ModelsViewCard(file.getName().replace(".jpg", "").replace(".png", "").replace(".jpeg", ""),
                 "https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80"));
 //                System.out.println("File: " + file.getAbsolutePath());
 //                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
