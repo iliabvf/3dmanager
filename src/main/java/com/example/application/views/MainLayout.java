@@ -20,8 +20,14 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
 import org.apache.xmlbeans.impl.xb.xsdschema.WhiteSpaceDocument;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -30,6 +36,9 @@ public class MainLayout extends AppLayout {
 
     private H1 viewTitle;
     static private MainLayout mainLayout;
+
+    HashMap<String,String> dirsMap = null;
+    HashMap<String, String> filesMap = new HashMap<>();
     static public MainLayout getMainLayout() {
         return mainLayout;
     }
@@ -87,60 +96,90 @@ public class MainLayout extends AppLayout {
         return nav;
     }
 
-    public class Person{
-        String firstName;
-        String lastName;
-        String email;
+    public class PicFolder{
+        String name;
+        String fullPath;
 
-        public Person(String firstName, String lastName, String email) {
-            this.firstName = firstName;
-            this.lastName = lastName;
-            this.email = email;
+        public PicFolder(String name, String fullPath) {
+            this.name = name;
+            this.fullPath = fullPath;
         }
 
-        public String getFirstName() {
-            return firstName;
+        public String getName() {
+            return name;
         }
 
-        public String getLastName() {
-            return lastName;
-        }
-
-        public String getEmail() {
-            return email;
+        public String getFullPath() {
+            return fullPath;
         }
     }
 
-    public List<Person> getStaff(Person manager) {
-        List<Person> managers = new ArrayList<>();
-        if (manager == null) {
-            managers.add(new Person("Interior", "", ""));
-            managers.add(new Person("Exterior", "", ""));
-        } else if (manager.getFirstName().equals("Interior")) {
-            managers.add(new Person("Tables", "", ""));
-            managers.add(new Person("Stairs", "", ""));
-        } else if (manager.getFirstName().equals("Exterior")) {
-            managers.add(new Person("Houses", "", ""));
-            managers.add(new Person("Trees", "", ""));
+    public List<PicFolder> getStaff(PicFolder parent) {
+        List<PicFolder> folders = new ArrayList<>();
+
+        if (parent == null) {
+            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
+                File file = new File(dir.getKey());
+                folders.add(new PicFolder(file.getName(), dir.getKey()));
+            }
+        } else {
+            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
+                if (dir.getValue() != null && dir.getValue().equals(parent.getFullPath())) {
+                    File file = new File(dir.getKey());
+                    folders.add(new PicFolder(file.getName(), dir.getKey()));
+                }
+            }
         }
-        return managers;
+        return folders;
     }
+
+    public void findFiles(File curFile, File parent) {
+        File[] files = curFile.listFiles();
+
+        if (dirsMap == null) {
+            dirsMap = new HashMap<>();
+        }
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                System.out.println("Directory: " + file.getAbsolutePath());
+                findFiles(file,file); // Calls same method again.
+                dirsMap.put(file.getAbsolutePath(), parent == null ? null : parent.getAbsolutePath());
+            } else {
+                System.out.println("File: " + file.getAbsolutePath());
+                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
+            }
+        }
+    }
+    
+    
+    
     private Component createTree(){
 
-        TreeGrid<Person> treeGrid = new TreeGrid<>();
+        File dir = new File("C:\\Users\\Vasek\\Desktop\\Lib Previews");
+        try{
+            filesMap = new HashMap<>();
+            dirsMap = null;
+            findFiles(dir,null);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        TreeGrid<PicFolder> treeGrid = new TreeGrid<>();
         treeGrid.setItems(getStaff(null), this::getStaff);
-        treeGrid.addHierarchyColumn(Person::getFirstName).setHeader("Folders");
+        treeGrid.addHierarchyColumn(PicFolder::getName).setHeader("Folders");
         treeGrid.setSelectionMode(TreeGrid.SelectionMode.SINGLE);
 
-        treeGrid.addItemClickListener(new ComponentEventListener<ItemClickEvent<Person>>() {
+        treeGrid.addItemClickListener(new ComponentEventListener<ItemClickEvent<PicFolder>>() {
             @Override
-            public void onComponentEvent(ItemClickEvent<Person> personItemClickEvent) {
-                ModelsView.getModelsView().getHeader().setText(personItemClickEvent.getItem().getFirstName());
+            public void onComponentEvent(ItemClickEvent<PicFolder> PicFolderItemClickEvent) {
+                ModelsView.getModelsView().getHeader().setText(PicFolderItemClickEvent.getItem().getName());
+                ModelsView.getModelsView().refreshImages(PicFolderItemClickEvent.getItem().getFullPath());
             }
         });
 
-//        treeGrid.addColumn(Person::getLastName).setHeader("Last name");
-//        treeGrid.addColumn(Person::getEmail).setHeader("Email");
+//        treeGrid.addColumn(PicFolder::getfullPath).setHeader("Last name");
+//        treeGrid.addColumn(PicFolder::getEmail).setHeader("Email");
 
         return treeGrid;
     }
