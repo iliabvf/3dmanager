@@ -5,6 +5,11 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.server.StreamResource;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class ModelsViewCard extends ListItem {
 
@@ -16,11 +21,25 @@ public class ModelsViewCard extends ListItem {
                 "rounded-m w-full");
         div.setHeight("160px");
 
-        Image image = new Image();
-        image.setWidth("100%");
-        image.setSrc(url);
-        image.setAlt(text);
 
+        File file = new File(url);
+//        System.out.println("Expecting to find file from " + file.getAbsolutePath());
+        Image image = new Image(new StreamResource(file.getName(), () -> {
+            try {
+                return new FileInputStream(file);
+            } catch (FileNotFoundException e) {
+                // file not found
+                e.printStackTrace();
+            }
+            return null;
+        }), "alt text");
+        image.setWidth("100%");
+
+        //
+//        Image image = new Image();
+//        image.setWidth("100%");
+//        image.setSrc(url);
+//        image.setAlt(text);
         div.add(image);
 
         Span header = new Span();

@@ -119,8 +119,10 @@ public class MainLayout extends AppLayout {
 
         if (parent == null) {
             for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
-                File file = new File(dir.getKey());
-                folders.add(new PicFolder(file.getName(), dir.getKey()));
+                if (dir.getValue() == null) {
+                    File file = new File(dir.getKey());
+                    folders.add(new PicFolder(file.getName(), dir.getKey()));
+                }
             }
         } else {
             for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
@@ -156,7 +158,7 @@ public class MainLayout extends AppLayout {
     
     private Component createTree(){
 
-        File dir = new File("C:\\Users\\Vasek\\Desktop\\Lib Previews");
+        File dir = new File("img");
         try{
             filesMap = new HashMap<>();
             dirsMap = null;
