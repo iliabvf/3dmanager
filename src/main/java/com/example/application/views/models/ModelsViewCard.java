@@ -19,7 +19,7 @@ public class ModelsViewCard extends ListItem {
         Div div = new Div();
         div.addClassNames("bg-contrast", "flex items-center", "justify-center", "mb-m", "overflow-hidden",
                 "rounded-m w-full");
-        div.setHeight("160px");
+//        div.setHeight("160px");
 
 
         File file = new File(url);
