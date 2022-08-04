@@ -9,7 +9,9 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.StreamResource;
 
 import java.io.File;
@@ -52,16 +54,17 @@ public class ModelsViewCard extends ListItem {
             @Override
             public void onComponentEvent(ClickEvent<Image> imageClickEvent) {
                 Dialog dialog = new Dialog();
-                dialog.setWidth("100%");
+//                dialog.setWidth("100%");
                 dialog.setHeight("100%");
                 dialog.setCloseOnOutsideClick(true);
                 dialog.setCloseOnEsc(true);
                 dialog.setModal(true);
 
                 Image image1 = new Image(streamResource, "alt text");
-                image1.setWidth("100%");
-                image1.setHeight("100%");
-                image1.getStyle().set("object-fit", "contain");
+//                image1.setWidth("100%");
+//                image1.setHeight("100%");
+                image1.getStyle().set("max-width", "100%");
+                image1.getStyle().set("height", "auto");
 
                 Button button = new Button("Close");
                 button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
@@ -74,7 +77,9 @@ public class ModelsViewCard extends ListItem {
                 HorizontalLayout horizontalLayout = new HorizontalLayout();
                 horizontalLayout.add(image1, button);
                 horizontalLayout.setWidth("100%");
-                horizontalLayout.setHeight("100%");
+//                horizontalLayout.setHeight("-1");
+                horizontalLayout.setAlignItems(HorizontalLayout.Alignment.CENTER);
+                horizontalLayout.setAlignItems(VerticalLayout.Alignment.START);
 
                 dialog.add(horizontalLayout);
                 dialog.open();
