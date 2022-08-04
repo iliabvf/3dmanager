@@ -1,9 +1,12 @@
 package com.example.application.views.models;
 
 import com.example.application.views.MainLayout;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.OrderedList;
@@ -17,6 +20,10 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @PageTitle("Models")
 @Route(value = "models", layout = MainLayout.class)
@@ -103,7 +110,124 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         imageContainer.addClassNames("gap-m", "grid", "list-none", "m-0", "p-0");
 
         container.add(header); //, sortBy);
-        add(container, imageContainer);
+
+        VerticalLayout leftContainer = new VerticalLayout();
+//        leftContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
+        leftContainer.add(container,imageContainer);
+
+        // Add right side container with projects
+        VerticalLayout rightContainer = new VerticalLayout();
+//        rightContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
+        rightContainer.setSizeFull();
+        rightContainer.add(createTree());
+        rightContainer.setAlignItems(HorizontalLayout.Alignment.END);
+        rightContainer.setWidth("auto");
+
+        rightContainer.setHeight(leftContainer.getHeight());
+
+        HorizontalLayout mainContainer = new HorizontalLayout();
+//        mainContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
+        mainContainer.setWidth("100%");
+        mainContainer.add(leftContainer, rightContainer);
+
+        add(mainContainer);
 
     }
+
+    public class PicFolder{
+        String name;
+        String fullPath;
+
+        public PicFolder(String name, String fullPath) {
+            this.name = name;
+            this.fullPath = fullPath;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getFullPath() {
+            return fullPath;
+        }
+    }
+
+    public List<PicFolder> getStaff(PicFolder parent) {
+        List<PicFolder> folders = new ArrayList<>();
+
+        if (parent == null) {
+//            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
+//                if (dir.getValue() == null) {
+//                    File file = new File(dir.getKey());
+////                    folders.add(new MainLayout.PicFolder(file.getName(), dir.getKey()));
+//                    folders.add(new PicFolder(file.getName(), dir.getKey()));
+//                }
+//            }
+            folders.add(new PicFolder("Project 1", ""));
+            folders.add(new PicFolder("Project 2", ""));
+            folders.add(new PicFolder("Project 3", ""));
+        } else {
+//            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
+//                if (dir.getValue() != null && dir.getValue().equals(parent.getFullPath())) {
+//                    File file = new File(dir.getKey());
+//                    folders.add(new PicFolder(file.getName(), dir.getKey()));
+//                }
+//            }
+        }
+        return folders;
+    }
+
+    public void findFiles(File curFile, File parent) {
+        File[] files = curFile.listFiles();
+
+        if (dirsMap == null) {
+            dirsMap = new HashMap<>();
+        }
+
+        for (File file : files) {
+            if (file.isDirectory()) {
+                System.out.println("Directory: " + file.getAbsolutePath());
+                findFiles(file,file); // Calls same method again.
+                dirsMap.put(file.getAbsolutePath(), parent == null ? null : parent.getAbsolutePath());
+            } else {
+                System.out.println("File: " + file.getAbsolutePath());
+                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
+            }
+        }
+    }
+
+    HashMap<String,String> dirsMap = null;
+    HashMap<String, String> filesMap = new HashMap<>();
+    private Component createTree(){
+
+        File dir = new File("img");
+        try{
+            filesMap = new HashMap<>();
+            dirsMap = null;
+            findFiles(dir,null);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        TreeGrid<PicFolder> treeGrid = new TreeGrid<>();
+        treeGrid.setItems(getStaff(null), this::getStaff);
+        treeGrid.addHierarchyColumn(PicFolder::getName).setHeader("Projects");
+        treeGrid.setSelectionMode(TreeGrid.SelectionMode.SINGLE);
+        treeGrid.setWidth("15em");
+
+//        treeGrid.addItemClickListener(new ComponentEventListener<ItemClickEvent<PicFolder>>() {
+//            @Override
+//            public void onComponentEvent(ItemClickEvent<PicFolder> PicFolderItemClickEvent) {
+//                ModelsView.getModelsView().getHeader().setText(PicFolderItemClickEvent.getItem().getName());
+//                ModelsView.getModelsView().refreshImages(PicFolderItemClickEvent.getItem().getFullPath());
+//            }
+//        });
+
+//        treeGrid.addColumn(PicFolder::getfullPath).setHeader("Last name");
+//        treeGrid.addColumn(PicFolder::getEmail).setHeader("Email");
+
+        return treeGrid;
+    }
+
+
 }

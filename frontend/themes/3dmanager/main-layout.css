@@ -59,3 +59,7 @@
   display: contents;
   font-weight: 500;
 }
+
+.max-w-screen-lg {
+  max-width: none;
+}

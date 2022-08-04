@@ -153,9 +153,7 @@ public class MainLayout extends AppLayout {
             }
         }
     }
-    
-    
-    
+
     private Component createTree(){
 
         File dir = new File("img");
