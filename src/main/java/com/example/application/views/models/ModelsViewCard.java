@@ -1,5 +1,8 @@
 package com.example.application.views.models;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
@@ -24,7 +27,7 @@ public class ModelsViewCard extends ListItem {
 
         File file = new File(url);
 //        System.out.println("Expecting to find file from " + file.getAbsolutePath());
-        Image image = new Image(new StreamResource(file.getName(), () -> {
+        StreamResource streamResource = new StreamResource(file.getName(), () -> {
             try {
                 return new FileInputStream(file);
             } catch (FileNotFoundException e) {
@@ -32,7 +35,9 @@ public class ModelsViewCard extends ListItem {
                 e.printStackTrace();
             }
             return null;
-        }), "alt text");
+        });
+
+        Image image = new Image(streamResource, "alt text");
         image.setWidth("100%");
 
         //
@@ -40,6 +45,26 @@ public class ModelsViewCard extends ListItem {
 //        image.setWidth("100%");
 //        image.setSrc(url);
 //        image.setAlt(text);
+
+        image.addClickListener(new ComponentEventListener<ClickEvent<Image>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Image> imageClickEvent) {
+                Dialog dialog = new Dialog();
+                dialog.setWidth("60em");
+                dialog.setHeight("50em");
+                dialog.setCloseOnOutsideClick(true);
+                dialog.setCloseOnEsc(true);
+                dialog.setModal(true);
+
+                Image image1 = new Image(streamResource, "alt text");
+                image1.setWidth("100%");
+                image1.setHeight("100%");
+
+                dialog.add(image1);
+                dialog.open();
+            }
+        });
+
         div.add(image);
 
         Span header = new Span();
