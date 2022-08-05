@@ -63,3 +63,12 @@
 .max-w-screen-lg {
   max-width: none;
 }
+
+#table {
+  position: fixed !important;
+  display: contents !important;
+}
+
+/*#drawer {*/
+/*  width: 12em;*/
+/*}*/

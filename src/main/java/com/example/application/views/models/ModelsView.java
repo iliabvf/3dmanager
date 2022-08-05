@@ -67,18 +67,25 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
         String absoluteImagesPath = new File("img").getAbsolutePath();
 
-        File[] files = new File(parentFullPath).listFiles();
-        for (File file : files) {
-            if (!file.isDirectory()) {
-                imageContainer.add(new ModelsViewCard(file.getName().replace(".jpg", "").replace(".png", "").replace(".jpeg", ""),
+        for (Map.Entry<MainLayout.PicFolder,String> entry : MainLayout.getMainLayout().getFilesMap().entrySet() ) {
+            if(!entry.getValue().contains(parentFullPath)){
+                continue;
+            }
+
+                File file = new File(entry.getKey().getFullPath());
+//        File[] files = new File(parentFullPath).listFiles();
+//        for (File file : files) {
+//            if (!file.isDirectory()) {
+                imageContainer.add(new ModelsViewCard(file.getName().replace(".jpg", "").replace(".png", "").replace(".jpeg", "")
                         //"https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80")
-                        file.getAbsolutePath().replace(absoluteImagesPath, "img")
+                        ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
 //                        "frontend/img/Bathroom/Bathtub/Antonio Lupi SUITE.jpeg"
+                        ,entry.getKey().getColor()
                 ));
 //                System.out.println("File: " + file.getAbsolutePath());
 //                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
 
-            }
+//            }
         }
 
     }
@@ -134,11 +141,11 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
     }
 
-    public class PicFolder{
+    public class Projects{
         String name;
         String fullPath;
 
-        public PicFolder(String name, String fullPath) {
+        public Projects(String name, String fullPath) {
             this.name = name;
             this.fullPath = fullPath;
         }
@@ -152,20 +159,20 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         }
     }
 
-    public List<PicFolder> getStaff(PicFolder parent) {
-        List<PicFolder> folders = new ArrayList<>();
+    public List<Projects> getStaff(Projects parent) {
+        List<Projects> folders = new ArrayList<>();
 
         if (parent == null) {
 //            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
 //                if (dir.getValue() == null) {
 //                    File file = new File(dir.getKey());
-////                    folders.add(new MainLayout.PicFolder(file.getName(), dir.getKey()));
-//                    folders.add(new PicFolder(file.getName(), dir.getKey()));
+////                    folders.add(new MainLayout.Projects(file.getName(), dir.getKey()));
+//                    folders.add(new Projects(file.getName(), dir.getKey()));
 //                }
 //            }
-            folders.add(new PicFolder("Project 1", ""));
-            folders.add(new PicFolder("Project 2", ""));
-            folders.add(new PicFolder("Project 3", ""));
+            folders.add(new Projects("Project 1", ""));
+            folders.add(new Projects("Project 2", ""));
+            folders.add(new Projects("Project 3", ""));
         } else {
 //            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
 //                if (dir.getValue() != null && dir.getValue().equals(parent.getFullPath())) {
@@ -177,43 +184,18 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         return folders;
     }
 
-    public void findFiles(File curFile, File parent) {
-        File[] files = curFile.listFiles();
-
-        if (dirsMap == null) {
-            dirsMap = new HashMap<>();
-        }
-
-        for (File file : files) {
-            if (file.isDirectory()) {
-                System.out.println("Directory: " + file.getAbsolutePath());
-                findFiles(file,file); // Calls same method again.
-                dirsMap.put(file.getAbsolutePath(), parent == null ? null : parent.getAbsolutePath());
-            } else {
-                System.out.println("File: " + file.getAbsolutePath());
-                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
-            }
-        }
-    }
-
     HashMap<String,String> dirsMap = null;
     HashMap<String, String> filesMap = new HashMap<>();
     private Component createTree(){
 
-        File dir = new File("img");
-        try{
-            filesMap = new HashMap<>();
-            dirsMap = null;
-            findFiles(dir,null);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-
-        TreeGrid<PicFolder> treeGrid = new TreeGrid<>();
+        TreeGrid<Projects> treeGrid = new TreeGrid<>();
+        treeGrid.setId("projectsTree");
+//        treeGrid.getStyle().set("position", "fixed");
+//        treeGrid.getStyle().set("display", "content");
         treeGrid.setItems(getStaff(null), this::getStaff);
-        treeGrid.addHierarchyColumn(PicFolder::getName).setHeader("Projects");
+        treeGrid.addHierarchyColumn(Projects::getName).setHeader("Projects");
         treeGrid.setSelectionMode(TreeGrid.SelectionMode.SINGLE);
-        treeGrid.setWidth("15em");
+        treeGrid.setWidth("10em");
 
 //        treeGrid.addItemClickListener(new ComponentEventListener<ItemClickEvent<PicFolder>>() {
 //            @Override

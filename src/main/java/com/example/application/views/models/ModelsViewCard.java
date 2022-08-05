@@ -20,7 +20,7 @@ import java.io.FileNotFoundException;
 
 public class ModelsViewCard extends ListItem {
 
-    public ModelsViewCard(String text, String url) {
+    public ModelsViewCard(String text, String url,String colorTag) {
         addClassNames("bg-contrast-5", "flex", "flex-col", "items-start", "p-m", "rounded-l");
 
         Div div = new Div();
@@ -104,9 +104,13 @@ public class ModelsViewCard extends ListItem {
         badge.getElement().setAttribute("theme", "badge");
         badge.setText(text);
 
+        Span colorBadge = new Span();
+        colorBadge.getElement().setAttribute("theme", "badge");
+        colorBadge.setText(colorTag);
+
         add(div, header
                 //, subtitle, description
-                , badge);
+                , badge, colorBadge);
 
     }
 }
