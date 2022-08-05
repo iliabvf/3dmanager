@@ -106,6 +106,10 @@ public class ModelsViewCard extends ListItem {
 
         Span colorBadge = new Span();
         colorBadge.getElement().setAttribute("theme", "badge");
+
+        String[] rgb = colorTag.split(",");
+
+        colorBadge.getStyle().set("background-color", "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")");
         colorBadge.setText(colorTag);
 
         add(div, header

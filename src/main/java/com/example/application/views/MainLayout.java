@@ -1,6 +1,8 @@
 package com.example.application.views;
 
 
+import com.example.application.ColorThief;
+import com.example.application.MMCQ;
 import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.views.models.ModelsView;
@@ -219,91 +221,19 @@ public class MainLayout extends AppLayout {
         return title == null ? "" : title.value();
     }
 
-    public static int[] getRGBArr(int pixel) {
-        int alpha = (pixel >> 24) & 0xff;
-        int red = (pixel >> 16) & 0xff;
-        int green = (pixel >> 8) & 0xff;
-        int blue = (pixel) & 0xff;
-        return new int[]{red,green,blue};
-
-    }
-    public static boolean isGray(int[] rgbArr) {
-        int rgDiff = rgbArr[0] - rgbArr[1];
-        int rbDiff = rgbArr[0] - rgbArr[2];
-        // Filter out black, white and grays...... (tolerance within 10 pixels)
-        int tolerance = 10;
-        if (rgDiff > tolerance || rgDiff < -tolerance)
-            if (rbDiff > tolerance || rbDiff < -tolerance) {
-                return false;
-            }
-        return true;
-    }
     private String getImageColor(String imagePath){
-        return "";
-//        File file = new File(imagePath); //"C:\\Users\\Andrew\\Desktop\\myImage.gif");
-//        ImageInputStream is = null;
-//        Iterator iter = null;
-//        try {
-//            is = ImageIO.createImageInputStream(file);
-//            iter = ImageIO.getImageReaders(is);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        if (!iter.hasNext())
-//        {
-//            System.out.println("Cannot load the specified file "+ file);
-////            System.exit(1);
-//            return "";
-//        }
-//        ImageReader imageReader = (ImageReader)iter.next();
-//        imageReader.setInput(is);
-//
-//        BufferedImage image = null;
-//        try {
-//            image = imageReader.read(0);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        int height = image.getHeight();
-//        int width = image.getWidth();
-//
-//        Map m = new HashMap();
-//        for(int i=0; i < width ; i++)
-//        {
-//            for(int j=0; j < height ; j++)
-//            {
-//                int rgb = image.getRGB(i, j);
-//                int[] rgbArr = getRGBArr(rgb);
-//                // Filter out grays....
-//                if (!isGray(rgbArr)) {
-//                    Integer counter = (Integer) m.get(rgb);
-//                    if (counter == null)
-//                        counter = 0;
-//                    counter++;
-//                    m.put(rgb, counter);
-//                }
-//            }
-//        }
-//        String colourHex = getMostCommonColour(m);
-//        System.out.println(colourHex);
-//
-//        return colourHex;
+        BufferedImage img1 = null;
+        try {
+            img1 = ImageIO.read(new File(imagePath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (img1 == null) {
+            return "";
+        }
+//        MMCQ.CMap result = ColorThief.getColorMap(img1, 10);
+        int[] result = ColorThief.getColor(img1);
+        return result[0] + "," + result[1] + "," + result[2];
     }
 
-    public static String getMostCommonColour(Map map) {
-        List list = new LinkedList(map.entrySet());
-        Collections.sort(list, new Comparator() {
-            public int compare(Object o1, Object o2) {
-                return ((Comparable) ((Map.Entry) (o1)).getValue())
-                        .compareTo(((Map.Entry) (o2)).getValue());
-            }
-        });
-        if (list.size() == 0)
-            return "";
-        Map.Entry me = (Map.Entry )list.get(list.size()-1);
-        int[] rgb= getRGBArr((Integer)me.getKey());
-        return Integer.toHexString(rgb[0])+" "+Integer.toHexString(rgb[1])+" "+Integer.toHexString(rgb[2]);
-    }
 }
