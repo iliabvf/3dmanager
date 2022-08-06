@@ -1,5 +1,6 @@
 package com.example.application.views.models;
 
+import com.example.application.ColorUtils;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
@@ -14,13 +15,14 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.server.StreamResource;
 
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class ModelsViewCard extends ListItem {
 
-    public ModelsViewCard(String text, String url,String colorTag) {
+    public ModelsViewCard(String text, String url, Color colorTag) {
         addClassNames("bg-contrast-5", "flex", "flex-col", "items-start", "p-m", "rounded-l");
 
         Div div = new Div();
@@ -107,10 +109,10 @@ public class ModelsViewCard extends ListItem {
         Span colorBadge = new Span();
         colorBadge.getElement().setAttribute("theme", "badge");
 
-        String[] rgb = colorTag.split(",");
+        String resultStr = new ColorUtils().getColorNameFromRgb(colorTag.getRed(), colorTag.getGreen(), colorTag.getBlue());
 
-        colorBadge.getStyle().set("background-color", "rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")");
-        colorBadge.setText(colorTag);
+        colorBadge.getStyle().set("background-color", "rgb(" + colorTag.getRed() + "," + colorTag.getGreen() + "," + colorTag.getBlue() + ")");
+        colorBadge.setText(resultStr);
 
         add(div, header
                 //, subtitle, description
