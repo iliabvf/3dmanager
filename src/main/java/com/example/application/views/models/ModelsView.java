@@ -6,6 +6,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.HasComponents;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Main;
@@ -132,12 +133,15 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
         rightContainer.setHeight(leftContainer.getHeight());
 
+        DropTarget.create(rightContainer);
+
         HorizontalLayout mainContainer = new HorizontalLayout();
 //        mainContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
         mainContainer.setWidth("100%");
         mainContainer.add(leftContainer, rightContainer);
 
         add(mainContainer);
+
 
     }
 
