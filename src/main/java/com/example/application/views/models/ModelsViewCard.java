@@ -109,10 +109,14 @@ public class ModelsViewCard extends ListItem {
         Span colorBadge = new Span();
         colorBadge.getElement().setAttribute("theme", "badge");
 
-        String resultStr = new ColorUtils().getColorNameFromRgb(colorTag.getRed(), colorTag.getGreen(), colorTag.getBlue());
+        String resultStr = "";
+        if (colorTag != null){
+            resultStr = new ColorUtils().getColorNameFromRgb(colorTag.getRed(), colorTag.getGreen(), colorTag.getBlue());
+            colorBadge.getStyle().set("background-color", "rgb(" + colorTag.getRed() + "," + colorTag.getGreen() + "," + colorTag.getBlue() + ")");
+            colorBadge.setText(resultStr);
 
-        colorBadge.getStyle().set("background-color", "rgb(" + colorTag.getRed() + "," + colorTag.getGreen() + "," + colorTag.getBlue() + ")");
-        colorBadge.setText(resultStr);
+        }
+
 
         add(div, header
                 //, subtitle, description
