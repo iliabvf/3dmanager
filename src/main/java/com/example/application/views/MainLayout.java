@@ -280,7 +280,7 @@ public class MainLayout extends AppLayout {
         BufferedImage img1 = null;
         try {
             img1 = ImageIO.read(new File(imagePath));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         if (img1 == null) {
