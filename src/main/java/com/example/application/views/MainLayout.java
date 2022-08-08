@@ -54,6 +54,10 @@ public class MainLayout extends AppLayout {
 
     private HashMap<String,PicFolder> picFolders;
 
+    public DataBasesController getDataBasesController() {
+        return dataBasesController;
+    }
+
     public HashMap<PicFolder, String> getFilesMap() {
         return filesMap;
     }

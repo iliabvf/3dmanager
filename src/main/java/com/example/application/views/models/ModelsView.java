@@ -1,11 +1,14 @@
 package com.example.application.views.models;
 
+import com.example.application.DataBasesController;
 import com.example.application.views.MainLayout;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasComponents;
-import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.H2;
@@ -20,7 +23,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
+import java.awt.*;
 import java.io.File;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +41,8 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
     static private ModelsView modelsView;
     H2 header;
+
+    TreeGrid<Projects> treeGrid;
 
     public H2 getHeader() {
         return header;
@@ -133,7 +141,64 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
         rightContainer.setHeight(leftContainer.getHeight());
 
-        DropTarget.create(rightContainer);
+        DropTarget.create(rightContainer).addDropListener(new ComponentEventListener<DropEvent<VerticalLayout>>() {
+            @Override
+            public void onComponentEvent(DropEvent<VerticalLayout> verticalLayoutDropEvent) {
+                if (verticalLayoutDropEvent.getDragSourceComponent().get() == null
+                        || !(verticalLayoutDropEvent.getDragSourceComponent().get() instanceof ModelsViewCard)) {
+                    return;
+                }
+
+                Dialog dialog = new Dialog();
+                dialog.setCloseOnEsc(true);
+                dialog.setCloseOnOutsideClick(true);
+                dialog.setWidth("30em");
+                dialog.setHeight("20em");
+                dialog.setHeaderTitle("Please select a project");
+
+                ComboBox<Projects> comboBox = new ComboBox<>();
+                List<Projects> projects = new ArrayList<>();
+                projects.add(new Projects(1,"Project 1"));
+                projects.add(new Projects(2,"Project 2"));
+                projects.add(new Projects(3,"Project 3"));
+                comboBox.setItems(projects);
+
+                Button button = new Button("Add");
+                button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+                    @Override
+                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                        if (comboBox.getValue() == null){
+                            return;
+                        }
+
+                        ModelsViewCard card = (ModelsViewCard) verticalLayoutDropEvent.getDragSourceComponent().get();
+
+
+                        try {
+                            PreparedStatement stmt;
+                            ResultSet rs = null;
+                            String sql = "INSERT INTO projectFiles (name,project) VALUES (?,?)";
+                            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+                            stmt.setString(1, card.getText());
+                            stmt.setInt(2, comboBox.getValue().getId());
+                            stmt.execute();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        refreshProjectTree();
+
+                        dialog.close();
+                    }
+                });
+
+                dialog.add(comboBox,button);
+
+                dialog.add();
+                dialog.open();
+
+            }
+        });
 
         HorizontalLayout mainContainer = new HorizontalLayout();
 //        mainContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
@@ -145,26 +210,11 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
     }
 
-    public class Projects{
-        String name;
-        String fullPath;
-
-        public Projects(String name, String fullPath) {
-            this.name = name;
-            this.fullPath = fullPath;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getFullPath() {
-            return fullPath;
-        }
+    void refreshProjectTree(){
+        treeGrid.setItems(getStaff(null), this::getStaff);
     }
 
     public List<Projects> getStaff(Projects parent) {
-        List<Projects> folders = new ArrayList<>();
 
         if (parent == null) {
 //            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
@@ -174,10 +224,32 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 //                    folders.add(new Projects(file.getName(), dir.getKey()));
 //                }
 //            }
-            folders.add(new Projects("Project 1", ""));
-            folders.add(new Projects("Project 2", ""));
-            folders.add(new Projects("Project 3", ""));
+            List<Projects> folders = new ArrayList<>();
+            folders.add(new Projects(1,"Project 1"));
+            folders.add(new Projects(2,"Project 2"));
+            folders.add(new Projects(3,"Project 3"));
+            return folders;
         } else {
+            List<Projects> folders = new ArrayList<>();
+            if (!(parent instanceof ProjectFiles)){
+                try {
+                    PreparedStatement stmt;
+                    ResultSet rs = null;
+                    String sql = "SELECT * FROM projectFiles WHERE project = ?";
+                    stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+                    stmt.setInt(1, parent.getId());
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        folders.add(new ProjectFiles(rs.getInt("id"),rs.getString("name")));
+//                    picFolders.put(rs.getString("filePath"), new MainLayout.PicFolder(rs.getString("fileName"), rs.getString("filePath"), new Color(rs.getInt("red"), rs.getInt("green"), rs.getInt("blue"))));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            return folders;
+
+
 //            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
 //                if (dir.getValue() != null && dir.getValue().equals(parent.getFullPath())) {
 //                    File file = new File(dir.getKey());
@@ -185,14 +257,12 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 //                }
 //            }
         }
-        return folders;
     }
 
     HashMap<String,String> dirsMap = null;
     HashMap<String, String> filesMap = new HashMap<>();
     private Component createTree(){
-
-        TreeGrid<Projects> treeGrid = new TreeGrid<>();
+        treeGrid = new TreeGrid<>();
         treeGrid.setId("projectsTree");
 //        treeGrid.getStyle().set("position", "fixed");
 //        treeGrid.getStyle().set("display", "content");

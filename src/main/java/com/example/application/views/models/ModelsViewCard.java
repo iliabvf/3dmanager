@@ -22,7 +22,15 @@ import java.io.FileNotFoundException;
 
 public class ModelsViewCard extends ListItem {
 
+    private String text;
+
+    public String getText() {
+        return text;
+    }
+
     public ModelsViewCard(String text, String url, java.awt.Color colorTag) {
+        this.text = text;
+
         addClassNames("bg-contrast-5", "flex", "flex-col", "items-start", "p-m", "rounded-l");
 
         Div div = new Div();
@@ -124,6 +132,7 @@ public class ModelsViewCard extends ListItem {
 
         // Drag
         DragSource<ListItem> dragSource = DragSource.create(this);
+
 
         // TEST
 //        VerticalLayout columnAWrapper = new VerticalLayout();

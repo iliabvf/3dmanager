@@ -158,7 +158,10 @@ public class DataBasesController {
 
     public DataBasesController() {
         connectToDatabase("jdbc:mysql://localhost:3306");
+        createTables();
+    }
 
+    void createTables(){
         boolean picFolderExists = false;
         try {
             String sql = "SELECT * \n" +
@@ -189,5 +192,39 @@ public class DataBasesController {
                 e.printStackTrace();
             }
         }
+
+        boolean projectFilesExists = false;
+        try {
+            String sql = "SELECT * \n" +
+                    "FROM information_schema.tables\n" +
+                    "WHERE table_schema = '3dm' \n" +
+                    "    AND table_name = 'projectFiles'\n" +
+                    "LIMIT 1;";
+            ResultSet rs = hsqlQuery(sql);
+            if (rs.next()) {
+                projectFilesExists = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (!projectFilesExists){
+            try {
+                String sql = "CREATE TABLE projectFiles (\n" +
+                        "    id BIGINT NOT NULL AUTO_INCREMENT,\n" +
+                        "    name TEXT,\n" +
+                        "    fileName TEXT,\n" +
+                        "    filePath TEXT,\n" +
+                        "    red INT,\n" +
+                        "    green INT,\n" +
+                        "    blue INT,\n" +
+                        "    project INT,\n" +
+                        "    PRIMARY KEY (id)\n" +
+                        ");";
+                hsqlQuery2(sql);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }
