@@ -12,6 +12,7 @@ import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.html.Paragraph;
@@ -85,12 +86,14 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 //        File[] files = new File(parentFullPath).listFiles();
 //        for (File file : files) {
 //            if (!file.isDirectory()) {
+
                 imageContainer.add(new ModelsViewCard(file.getName().replace(".jpg", "").replace(".png", "").replace(".jpeg", "")
                         //"https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80")
                         ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
 //                        "frontend/img/Bathroom/Bathtub/Antonio Lupi SUITE.jpeg"
                         ,entry.getKey().getColor()
                 ));
+
 //                System.out.println("File: " + file.getAbsolutePath());
 //                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
 
@@ -135,10 +138,8 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         VerticalLayout rightContainer = new VerticalLayout();
 //        rightContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
         rightContainer.setSizeFull();
-        rightContainer.add(createTree());
         rightContainer.setAlignItems(HorizontalLayout.Alignment.END);
         rightContainer.setWidth("auto");
-
         rightContainer.setHeight(leftContainer.getHeight());
 
         DropTarget.create(rightContainer).addDropListener(new ComponentEventListener<DropEvent<VerticalLayout>>() {
@@ -207,6 +208,8 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
         add(mainContainer);
 
+        createTree(rightContainer);
+
 
     }
 
@@ -261,15 +264,32 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
     HashMap<String,String> dirsMap = null;
     HashMap<String, String> filesMap = new HashMap<>();
-    private Component createTree(){
-        treeGrid = new TreeGrid<>();
-        treeGrid.setId("projectsTree");
-//        treeGrid.getStyle().set("position", "fixed");
-//        treeGrid.getStyle().set("display", "content");
-        treeGrid.setItems(getStaff(null), this::getStaff);
-        treeGrid.addHierarchyColumn(Projects::getName).setHeader("Projects");
-        treeGrid.setSelectionMode(TreeGrid.SelectionMode.SINGLE);
-        treeGrid.setWidth("10em");
+    private void createTree(VerticalLayout rightContainer){
+        rightContainer.removeAll();
+
+        for (Projects project : getStaff(null)) {
+            if (project instanceof Projects){
+
+                Button button = new Button(project.getName());
+                button.setId("projectButton" + project.getId());
+                button.setWidth("100%");
+
+                HorizontalLayout horizontalLayout = new HorizontalLayout();
+                horizontalLayout.setWidth("10em");
+                horizontalLayout.add(new Label("..."),new Label("No files added"));
+
+                rightContainer.add(button,horizontalLayout);
+            }
+        }
+
+//        treeGrid = new TreeGrid<>();
+//        treeGrid.setId("projectsTree");
+////        treeGrid.getStyle().set("position", "fixed");
+////        treeGrid.getStyle().set("display", "content");
+//        treeGrid.setItems(getStaff(null), this::getStaff);
+//        treeGrid.addHierarchyColumn(Projects::getName).setHeader("Projects");
+//        treeGrid.setSelectionMode(TreeGrid.SelectionMode.SINGLE);
+//        treeGrid.setWidth("10em");
 
 //        treeGrid.addItemClickListener(new ComponentEventListener<ItemClickEvent<PicFolder>>() {
 //            @Override
@@ -282,7 +302,7 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 //        treeGrid.addColumn(PicFolder::getfullPath).setHeader("Last name");
 //        treeGrid.addColumn(PicFolder::getEmail).setHeader("Email");
 
-        return treeGrid;
+//        return treeGrid;
     }
 
 

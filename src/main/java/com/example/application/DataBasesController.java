@@ -226,5 +226,33 @@ public class DataBasesController {
             }
         }
 
+        boolean picTagsExists = false;
+        try {
+            String sql = "SELECT * \n" +
+                    "FROM information_schema.tables\n" +
+                    "WHERE table_schema = '3dm' \n" +
+                    "    AND table_name = 'picTags'\n" +
+                    "LIMIT 1;";
+            ResultSet rs = hsqlQuery(sql);
+            if (rs.next()) {
+                picTagsExists = true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (!picTagsExists){
+            try {
+                String sql = "CREATE TABLE picTags (\n" +
+                        "    id BIGINT NOT NULL AUTO_INCREMENT,\n" +
+                        "    name VarChar(500),\n" +
+                        "    picFolder INT,\n" +
+                        "    PRIMARY KEY (id)\n" +
+                        ");";
+                hsqlQuery2(sql);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
     }
 }

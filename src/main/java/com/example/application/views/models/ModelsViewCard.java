@@ -2,6 +2,7 @@ package com.example.application.views.models;
 
 import com.example.application.CardComponent;
 import com.example.application.ColorUtils;
+import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
@@ -19,6 +20,8 @@ import com.vaadin.flow.server.StreamResource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class ModelsViewCard extends ListItem {
 
@@ -124,11 +127,35 @@ public class ModelsViewCard extends ListItem {
             colorBadge.setText(resultStr);
 
         }
+        Div divTags = new Div();
+        divTags.addClassNames("flex", "flex-row", "flex-wrap", "justify-between", "items-center", "mb-m");
+        divTags.add(badge, colorBadge);
 
+        // Add user tags
+//        try {
+//            PreparedStatement stmt;
+//            ResultSet rs = null;
+//            String sql = "SELECT * FROM picTags WHERE picFolder = ?";
+//            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+//            stmt.setInt(1, parent.getId());
+//            rs = stmt.executeQuery();
+//            while (rs.next()) {
+//                folders.add(new ProjectFiles(rs.getInt("id"),rs.getString("name")));
+////                    picFolders.put(rs.getString("filePath"), new MainLayout.PicFolder(rs.getString("fileName"), rs.getString("filePath"), new Color(rs.getInt("red"), rs.getInt("green"), rs.getInt("blue"))));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        // Add tag button
+        Button buttonAddTag = new Button();
+        buttonAddTag.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        buttonAddTag.setText("+Add");
+        divTags.add(buttonAddTag);
 
         add(div, header
                 //, subtitle, description
-                , badge, colorBadge);
+                ,divTags);
 
         // Drag
         DragSource<ListItem> dragSource = DragSource.create(this);
