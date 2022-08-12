@@ -26,13 +26,18 @@ import java.sql.ResultSet;
 public class ModelsViewCard extends ListItem {
 
     private String text;
+    private String fileName;
 
     public String getText() {
         return text;
     }
+    public String getFileName() {
+        return fileName;
+    }
 
-    public ModelsViewCard(String text, String url, java.awt.Color colorTag) {
-        this.text = text;
+    public ModelsViewCard(String fileName, String url, java.awt.Color colorTag) {
+        this.fileName = fileName;
+        this.text = fileName.replace(".jpg", "").replace(".png", "").replace(".jpeg", "").replace(".gif", "");
 
         addClassNames("bg-contrast-5", "flex", "flex-col", "items-start", "p-m", "rounded-l");
 

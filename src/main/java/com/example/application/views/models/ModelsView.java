@@ -1,6 +1,7 @@
 package com.example.application.views.models;
 
 import com.example.application.DataBasesController;
+import com.example.application.Service;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.Component;
@@ -45,6 +46,8 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
     TreeGrid<Projects> treeGrid;
 
+    VerticalLayout rightContainer;
+
     public H2 getHeader() {
         return header;
     }
@@ -87,7 +90,7 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 //        for (File file : files) {
 //            if (!file.isDirectory()) {
 
-                imageContainer.add(new ModelsViewCard(file.getName().replace(".jpg", "").replace(".png", "").replace(".jpeg", "")
+                imageContainer.add(new ModelsViewCard(file.getName()
                         //"https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80")
                         ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
 //                        "frontend/img/Bathroom/Bathtub/Antonio Lupi SUITE.jpeg"
@@ -135,71 +138,71 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         leftContainer.add(container,imageContainer);
 
         // Add right side container with projects
-        VerticalLayout rightContainer = new VerticalLayout();
+        rightContainer = new VerticalLayout();
 //        rightContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
         rightContainer.setSizeFull();
         rightContainer.setAlignItems(HorizontalLayout.Alignment.END);
         rightContainer.setWidth("auto");
         rightContainer.setHeight(leftContainer.getHeight());
 
-        DropTarget.create(rightContainer).addDropListener(new ComponentEventListener<DropEvent<VerticalLayout>>() {
-            @Override
-            public void onComponentEvent(DropEvent<VerticalLayout> verticalLayoutDropEvent) {
-                if (verticalLayoutDropEvent.getDragSourceComponent().get() == null
-                        || !(verticalLayoutDropEvent.getDragSourceComponent().get() instanceof ModelsViewCard)) {
-                    return;
-                }
+//        DropTarget.create(rightContainer).addDropListener(new ComponentEventListener<DropEvent<VerticalLayout>>() {
+//            @Override
+//            public void onComponentEvent(DropEvent<VerticalLayout> verticalLayoutDropEvent) {
+//                if (verticalLayoutDropEvent.getDragSourceComponent().get() == null
+//                        || !(verticalLayoutDropEvent.getDragSourceComponent().get() instanceof ModelsViewCard)) {
+//                    return;
+//                }
 
-                Dialog dialog = new Dialog();
-                dialog.setCloseOnEsc(true);
-                dialog.setCloseOnOutsideClick(true);
-                dialog.setWidth("30em");
-                dialog.setHeight("20em");
-                dialog.setHeaderTitle("Please select a project");
+//                Dialog dialog = new Dialog();
+//                dialog.setCloseOnEsc(true);
+//                dialog.setCloseOnOutsideClick(true);
+//                dialog.setWidth("30em");
+//                dialog.setHeight("20em");
+//                dialog.setHeaderTitle("Please select a project");
+//
+//                ComboBox<Projects> comboBox = new ComboBox<>();
+//                List<Projects> projects = new ArrayList<>();
+//                projects.add(new Projects(1,"Project 1"));
+//                projects.add(new Projects(2,"Project 2"));
+//                projects.add(new Projects(3,"Project 3"));
+//                comboBox.setItems(projects);
+//
+//                Button button = new Button("Add");
+//                button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+//                    @Override
+//                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+//                        if (comboBox.getValue() == null){
+//                            return;
+//                        }
+//
+//                        ModelsViewCard card = (ModelsViewCard) verticalLayoutDropEvent.getDragSourceComponent().get();
+//
+//
+//                        try {
+//                            PreparedStatement stmt;
+//                            ResultSet rs = null;
+//                            String sql = "INSERT INTO projectFiles (name,project) VALUES (?,?)";
+//                            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+//                            stmt.setString(1, card.getText());
+//                            stmt.setInt(2, comboBox.getValue().getId());
+//                            stmt.execute();
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//
+//                        refreshProjectTree();
+//
+//                        dialog.close();
+//                    }
+//                });
+//
+//                dialog.add(comboBox,button);
+//
+//                dialog.add();
+//                dialog.open();
 
-                ComboBox<Projects> comboBox = new ComboBox<>();
-                List<Projects> projects = new ArrayList<>();
-                projects.add(new Projects(1,"Project 1"));
-                projects.add(new Projects(2,"Project 2"));
-                projects.add(new Projects(3,"Project 3"));
-                comboBox.setItems(projects);
-
-                Button button = new Button("Add");
-                button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-                    @Override
-                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                        if (comboBox.getValue() == null){
-                            return;
-                        }
-
-                        ModelsViewCard card = (ModelsViewCard) verticalLayoutDropEvent.getDragSourceComponent().get();
-
-
-                        try {
-                            PreparedStatement stmt;
-                            ResultSet rs = null;
-                            String sql = "INSERT INTO projectFiles (name,project) VALUES (?,?)";
-                            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
-                            stmt.setString(1, card.getText());
-                            stmt.setInt(2, comboBox.getValue().getId());
-                            stmt.execute();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-
-                        refreshProjectTree();
-
-                        dialog.close();
-                    }
-                });
-
-                dialog.add(comboBox,button);
-
-                dialog.add();
-                dialog.open();
-
-            }
-        });
+//            }
+//        });
 
         HorizontalLayout mainContainer = new HorizontalLayout();
 //        mainContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
@@ -210,12 +213,37 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
         createTree(rightContainer);
 
-
     }
 
-    void refreshProjectTree(){
-        treeGrid.setItems(getStaff(null), this::getStaff);
+    void addDropListener(Component component){
+        DropTarget.create(component).addDropListener(new ComponentEventListener<DropEvent<Component>>() {
+            @Override
+            public void onComponentEvent(DropEvent<Component> componentDropEvent) {
+                if (componentDropEvent.getDragSourceComponent().get() == null
+                        || !(componentDropEvent.getDragSourceComponent().get() instanceof ModelsViewCard)) {
+                    return;
+                }
+
+                ModelsViewCard card = (ModelsViewCard)componentDropEvent.getDragSourceComponent().get();
+                String fileExt = card.getFileName().substring(card.getFileName().lastIndexOf("."));
+
+                int projectId = Integer.parseInt(componentDropEvent.getSource().getId().get().replace("projectLayout",""));
+                Label label = (Label)Service.findComponentWithId(rightContainer, "labelFiles" + projectId);
+
+                int n = 0;
+                if (!label.getText().equals("No files added")){
+                    n = Integer.parseInt(label.getText().substring(label.getText().lastIndexOf("(")).replace("(", "").replace(")", ""));
+                }
+                n++;
+
+                label.setText(fileExt + "(" + n + ")");
+            }
+        });
     }
+
+//    void refreshProjectTree(){
+//        treeGrid.setItems(getStaff(null), this::getStaff);
+//    }
 
     public List<Projects> getStaff(Projects parent) {
 
@@ -270,15 +298,28 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         for (Projects project : getStaff(null)) {
             if (project instanceof Projects){
 
+                VerticalLayout projectContainer = new VerticalLayout();
+                projectContainer.setId("projectLayout" + project.getId());
+                projectContainer.setSpacing(false);
+                projectContainer.setPadding(false);
+                projectContainer.setMargin(false);
+
                 Button button = new Button(project.getName());
                 button.setId("projectButton" + project.getId());
                 button.setWidth("100%");
 
+                Label labelFiles = new Label("No files added");
+                labelFiles.setId("labelFiles" + project.getId());
+
                 HorizontalLayout horizontalLayout = new HorizontalLayout();
                 horizontalLayout.setWidth("10em");
-                horizontalLayout.add(new Label("..."),new Label("No files added"));
+                horizontalLayout.add(new Label("..."),labelFiles);
 
-                rightContainer.add(button,horizontalLayout);
+                projectContainer.add(button,horizontalLayout);
+
+                rightContainer.add(projectContainer);
+
+                addDropListener(projectContainer);
             }
         }
 
