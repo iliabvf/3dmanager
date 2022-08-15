@@ -1,4 +1,4 @@
-package com.example.application.views.models;
+package com.example.application.models;
 
 public class ProjectFiles extends Projects {
     Integer project;

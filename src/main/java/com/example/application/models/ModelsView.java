@@ -1,17 +1,12 @@
-package com.example.application.views.models;
+package com.example.application.models;
 
-import com.example.application.DataBasesController;
 import com.example.application.Service;
 import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
-import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Main;
@@ -19,13 +14,11 @@ import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
-import java.awt.*;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -86,15 +79,13 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
             }
 
                 File file = new File(entry.getKey().getFullPath());
-//        File[] files = new File(parentFullPath).listFiles();
-//        for (File file : files) {
-//            if (!file.isDirectory()) {
 
                 imageContainer.add(new ModelsViewCard(file.getName()
                         //"https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80")
                         ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
 //                        "frontend/img/Bathroom/Bathtub/Antonio Lupi SUITE.jpeg"
                         ,entry.getKey().getColor()
+                        ,entry.getKey().getId()
                 ));
 
 //                System.out.println("File: " + file.getAbsolutePath());

@@ -3,17 +3,14 @@ package com.example.application.views;
 
 import com.example.application.ColorThief;
 import com.example.application.DataBasesController;
-import com.example.application.MMCQ;
 import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
-import com.example.application.views.models.ModelsView;
+import com.example.application.models.ModelsView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasText;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.html.Label;
@@ -22,18 +19,11 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
-import org.apache.xmlbeans.impl.xb.xsdschema.WhiteSpaceDocument;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
@@ -125,11 +115,13 @@ public class MainLayout extends AppLayout {
         String name;
         String fullPath;
         Color color;
+        int id;
 
-        public PicFolder(String name, String fullPath, Color color) {
+        public PicFolder(String name, String fullPath, Color color, int id) {
             this.name = name;
             this.fullPath = fullPath;
             this.color = color;
+            this.id = id;
         }
 
         public String getName() {
@@ -147,6 +139,10 @@ public class MainLayout extends AppLayout {
         public void setColor(Color color) {
             this.color = color;
         }
+
+        public int getId() {
+            return id;
+        }
     }
 
     public List<PicFolder> getStaff(PicFolder parent) {
@@ -156,14 +152,14 @@ public class MainLayout extends AppLayout {
             for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
                 if (dir.getValue() == null) {
                     File file = new File(dir.getKey());
-                    folders.add(new PicFolder(file.getName(),dir.getKey(),null));
+                    folders.add(new PicFolder(file.getName(),dir.getKey(),null,0));
                 }
             }
         } else {
             for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
                 if (dir.getValue() != null && dir.getValue().equals(parent.getFullPath())) {
                     File file = new File(dir.getKey());
-                    folders.add(new PicFolder(file.getName(),dir.getKey(),null));
+                    folders.add(new PicFolder(file.getName(),dir.getKey(),null,0));
                 }
             }
         }
@@ -187,14 +183,16 @@ public class MainLayout extends AppLayout {
                 Color foundColor = null;
 
                 PicFolder foundPicFolder = picFolders.get(file.getAbsolutePath());
+                int foundPicFolderId = 0;
                 if (foundPicFolder != null) {
                     foundColor = foundPicFolder.getColor();
+                    foundPicFolderId = foundPicFolder.getId();
                 }
 
                 if (foundColor == null) {
                     foundColor = getImageColor(file.getPath());
                     if (foundColor != null) {
-                        picFolders.put(file.getAbsolutePath(), new PicFolder(file.getName(),file.getAbsolutePath(),foundColor));
+                        picFolders.put(file.getAbsolutePath(), new PicFolder(file.getName(),file.getAbsolutePath(),foundColor,foundPicFolderId));
                         try {
                             PreparedStatement stmt;
                             ResultSet rs = null;
@@ -212,7 +210,7 @@ public class MainLayout extends AppLayout {
                     }
                 }
 
-                filesMap.put(new PicFolder(file.getName(),file.getAbsolutePath(),foundColor), parent.getAbsolutePath());
+                filesMap.put(new PicFolder(file.getName(),file.getAbsolutePath(),foundColor,foundPicFolderId), parent.getAbsolutePath());
 
             }
         }
@@ -228,7 +226,7 @@ public class MainLayout extends AppLayout {
             stmt = dataBasesController.getHsqlConnection().prepareStatement(sql);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                picFolders.put(rs.getString("filePath"), new PicFolder(rs.getString("fileName"), rs.getString("filePath"), new Color(rs.getInt("red"), rs.getInt("green"), rs.getInt("blue"))));
+                picFolders.put(rs.getString("filePath"), new PicFolder(rs.getString("fileName"), rs.getString("filePath"), new Color(rs.getInt("red"), rs.getInt("green"), rs.getInt("blue")), rs.getInt("id")));
             }
         } catch (Exception e) {
             e.printStackTrace();
