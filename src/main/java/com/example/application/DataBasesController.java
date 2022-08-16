@@ -214,6 +214,7 @@ public class DataBasesController {
                         "    name TEXT,\n" +
                         "    fileName TEXT,\n" +
                         "    filePath TEXT,\n" +
+                        "    color TEXT,\n" +
                         "    red INT,\n" +
                         "    green INT,\n" +
                         "    blue INT,\n" +

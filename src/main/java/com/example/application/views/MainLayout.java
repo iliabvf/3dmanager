@@ -2,6 +2,7 @@ package com.example.application.views;
 
 
 import com.example.application.ColorThief;
+import com.example.application.ColorUtils;
 import com.example.application.DataBasesController;
 import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
@@ -11,6 +12,7 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.html.Label;
@@ -71,6 +73,49 @@ public class MainLayout extends AppLayout {
         toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
+        ComboBox<String> searchComboBox = new ComboBox<>();
+        searchComboBox.setPlaceholder("Search here tags, models, colors, etc...");
+        searchComboBox.setAllowCustomValue(true);
+
+        List<String> searchList = new ArrayList<>();
+        try {
+            PreparedStatement stmt;
+            ResultSet rs = null;
+            String sql = "SELECT name FROM pictags WHERE name IS NOT NULL GROUP BY name ";
+            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                searchList.add(rs.getString("name"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            PreparedStatement stmt;
+            ResultSet rs = null;
+            String sql = "SELECT fileName FROM picfolder WHERE fileName IS NOT NULL GROUP BY fileName ";
+            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                searchList.add(rs.getString("fileName"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            PreparedStatement stmt;
+            ResultSet rs = null;
+            String sql = "SELECT color FROM picfolder WHERE color IS NOT NULL GROUP BY color ";
+            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                searchList.add(rs.getString("color"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        searchComboBox.setItems(searchList);
+
         viewTitle = new H1();
         viewTitle.addClassNames("view-title");
 
@@ -85,7 +130,7 @@ public class MainLayout extends AppLayout {
         horizontalLayout.setMargin(false);
         horizontalLayout.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
-        Header header = new Header(toggle, viewTitle, horizontalLayout);
+        Header header = new Header(toggle, searchComboBox, horizontalLayout);
         header.addClassNames("view-header");
         return header;
     }
@@ -196,13 +241,14 @@ public class MainLayout extends AppLayout {
                         try {
                             PreparedStatement stmt;
                             ResultSet rs = null;
-                            String sql = "INSERT INTO picFolder (fileName,filePath,red,green,blue) VALUES (?,?,?,?,?)";
+                            String sql = "INSERT INTO picFolder (fileName,filePath,red,green,blue,color) VALUES (?,?,?,?,?,?)";
                             stmt = dataBasesController.getHsqlConnection().prepareStatement(sql);
                             stmt.setString(1, file.getName());
                             stmt.setString(2, file.getAbsolutePath());
                             stmt.setInt(3, foundColor.getRed());
                             stmt.setInt(4, foundColor.getGreen());
                             stmt.setInt(5, foundColor.getBlue());
+                            stmt.setString(6, new ColorUtils().getColorNameFromRgb(foundColor.getRed(), foundColor.getGreen(), foundColor.getBlue()));
                             stmt.execute();
                         } catch (Exception e) {
                             e.printStackTrace();
