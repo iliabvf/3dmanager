@@ -7,12 +7,16 @@ import com.example.application.DataBasesController;
 import com.example.application.components.appnav.AppNav;
 import com.example.application.components.appnav.AppNavItem;
 import com.example.application.models.ModelsView;
+import com.example.application.models.SearchItem;
+import com.vaadin.flow.component.AbstractField;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.combobox.GeneratedVaadinComboBox;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.html.Label;
@@ -73,19 +77,19 @@ public class MainLayout extends AppLayout {
         toggle.addThemeVariants(ButtonVariant.LUMO_CONTRAST);
         toggle.getElement().setAttribute("aria-label", "Menu toggle");
 
-        ComboBox<String> searchComboBox = new ComboBox<>();
+        ComboBox<SearchItem> searchComboBox = new ComboBox<>();
         searchComboBox.setPlaceholder("Search here tags, models, colors, etc...");
         searchComboBox.setAllowCustomValue(true);
 
-        List<String> searchList = new ArrayList<>();
+        List<SearchItem> searchList = new ArrayList<>();
         try {
             PreparedStatement stmt;
             ResultSet rs = null;
-            String sql = "SELECT name FROM pictags WHERE name IS NOT NULL GROUP BY name ";
+            String sql = "SELECT name,id FROM pictags WHERE name IS NOT NULL GROUP BY name ";
             stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                searchList.add(rs.getString("name"));
+                searchList.add(new SearchItem(rs.getString("name"),rs.getInt("id"),"pictags"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -93,11 +97,11 @@ public class MainLayout extends AppLayout {
         try {
             PreparedStatement stmt;
             ResultSet rs = null;
-            String sql = "SELECT fileName FROM picfolder WHERE fileName IS NOT NULL GROUP BY fileName ";
+            String sql = "SELECT fileName,id FROM picfolder WHERE fileName IS NOT NULL GROUP BY fileName ";
             stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                searchList.add(rs.getString("fileName"));
+                searchList.add(new SearchItem(rs.getString("fileName"),rs.getInt("id"),"picfolder"));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,16 +109,29 @@ public class MainLayout extends AppLayout {
         try {
             PreparedStatement stmt;
             ResultSet rs = null;
-            String sql = "SELECT color FROM picfolder WHERE color IS NOT NULL GROUP BY color ";
+            String sql = "SELECT color,id FROM picfolder WHERE color IS NOT NULL GROUP BY color ";
             stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                searchList.add(rs.getString("color"));
+                searchList.add(new SearchItem(rs.getString("color"),rs.getInt("id"),"picfolder"));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         searchComboBox.setItems(searchList);
+
+        searchComboBox.addCustomValueSetListener(new ComponentEventListener<GeneratedVaadinComboBox.CustomValueSetEvent<ComboBox<SearchItem>>>() {
+            @Override
+            public void onComponentEvent(GeneratedVaadinComboBox.CustomValueSetEvent<ComboBox<SearchItem>> comboBoxCustomValueSetEvent) {
+                ModelsView.getModelsView().refreshImagesFromSearch(comboBoxCustomValueSetEvent.getDetail());
+            }
+        });
+        searchComboBox.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<ComboBox<SearchItem>, SearchItem>>() {
+            @Override
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<ComboBox<SearchItem>, SearchItem> comboBoxStringComponentValueChangeEvent) {
+                ModelsView.getModelsView().refreshImagesFromSearch(comboBoxStringComponentValueChangeEvent.getValue() == null ? "" : comboBoxStringComponentValueChangeEvent.getValue());
+            }
+        });
 
         viewTitle = new H1();
         viewTitle.addClassNames("view-title");

@@ -19,6 +19,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
+import java.awt.*;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,6 +68,89 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
         modelsView = this;
     }
+
+    public void refreshImagesFromSearch(Object searchObj){
+        String searchString;
+        if (searchObj instanceof String){
+            searchString = (String) searchObj;
+        } else {
+            searchString = ((SearchItem) searchObj).getItem();
+        }
+        header.setText("Search results for: " + searchString);
+
+        imageContainer.removeAll();
+
+        String absoluteImagesPath = new File("img").getAbsolutePath();
+
+//        List<SearchItem> searchList = new ArrayList<>();
+        try {
+            PreparedStatement stmt;
+            ResultSet rs = null;
+            String sql = "SELECT name, pictags.id AS id, pictags.picFolder, picfolder.fileName, picFolder.filePath, picFolder.blue, picFolder.green, picFolder.red\n" +
+                    "FROM picfolder left join pictags on picfolder.id = pictags.picFolder\n" +
+                    "WHERE NOT fileName IS NULL AND (name LIKE ?\n" +
+                    "      OR picFolder.fileName LIKE ?\n" +
+                    "      OR picFolder.color LIKE ?)";
+            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+            stmt.setString(1, "%" + searchString + "%");
+            stmt.setString(2, "%" + searchString + "%");
+            stmt.setString(3, "%" + searchString + "%");
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+//                searchList.add(new SearchItem(rs.getString("name"),rs.getInt("id"),"pictags"));
+
+//        for (Map.Entry<MainLayout.PicFolder,String> entry : MainLayout.getMainLayout().getFilesMap().entrySet() ) {
+//            if(!entry.getValue().contains(parentFullPath)){
+//                continue;
+//            }
+
+            File file = new File(rs.getString("filePath"));
+
+            imageContainer.add(new ModelsViewCard(rs.getString("fileName")
+                    ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
+                    ,new Color(rs.getInt("red"),rs.getInt("green"),rs.getInt("blue"))
+                    ,rs.getInt("id")
+            ));
+//
+//        }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        try {
+//            PreparedStatement stmt;
+//            ResultSet rs = null;
+//            String sql = "SELECT fileName,id FROM picfolder WHERE fileName IS NOT NULL GROUP BY fileName ";
+//            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+//            rs = stmt.executeQuery();
+//            while (rs.next()) {
+//                searchList.add(new SearchItem(rs.getString("fileName"),rs.getInt("id"),"picfolder"));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+//        String absoluteImagesPath = new File("img").getAbsolutePath();
+//
+//        for (Map.Entry<MainLayout.PicFolder,String> entry : MainLayout.getMainLayout().getFilesMap().entrySet() ) {
+//            if(!entry.getValue().contains(parentFullPath)){
+//                continue;
+//            }
+//
+//            File file = new File(entry.getKey().getFullPath());
+//
+//            imageContainer.add(new ModelsViewCard(file.getName()
+//                    ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
+//                    ,entry.getKey().getColor()
+//                    ,entry.getKey().getId()
+//            ));
+//
+//        }
+
+    }
+
 
     public void refreshImages(String parentFullPath){
         imageContainer.removeAll();
