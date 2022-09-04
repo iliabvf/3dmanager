@@ -80,6 +80,8 @@ public class MainLayout extends AppLayout {
         ComboBox<SearchItem> searchComboBox = new ComboBox<>();
         searchComboBox.setPlaceholder("Search here tags, models, colors, etc...");
         searchComboBox.setAllowCustomValue(true);
+        searchComboBox.getStyle().set("--vaadin-combo-box-overlay-width", "40em");
+        searchComboBox.setWidth("40em");
 
         List<SearchItem> searchList = new ArrayList<>();
         try {
