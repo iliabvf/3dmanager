@@ -263,7 +263,10 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
                     }
                 } else {
                     if (!label.getText().equals("No files added")){
-                        n = Integer.parseInt(label.getText().replace(fileExt.replace(".",""),"").replace(" ","").replace("files",""));
+                        n = Integer.parseInt(
+                                label.getText().replace(fileExt.replace(".",""),"")
+                                .replace(" ","").replace("files","")
+                                .replace("(","").replace(")","").replace(".",""));
                     }
 
                 }
