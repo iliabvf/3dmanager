@@ -27,10 +27,8 @@ import java.awt.*;
 import java.io.File;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 @PageTitle("Models")
 @Route(value = "models", layout = MainLayout.class)
@@ -161,26 +159,38 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
         String absoluteImagesPath = new File("img").getAbsolutePath();
 
-        for (Map.Entry<MainLayout.PicFolder,String> entry : MainLayout.getMainLayout().getFilesMap().entrySet() ) {
-            if(!entry.getValue().contains(parentFullPath)){
-                continue;
-            }
+        List<MainLayout.PicFolder> list = new ArrayList();
+        MainLayout.getMainLayout().getFilesMap().entrySet().stream().filter(entry -> entry.getValue().contains(parentFullPath)).forEach(e->list.add(e.getKey()));
+        list.stream().sorted(Comparator.comparing(MainLayout.PicFolder::getName)).forEach(entry -> {
+            File file = new File(entry.getFullPath());
 
-                File file = new File(entry.getKey().getFullPath());
+            imageContainer.add(new ModelsViewCard(file.getName()
+                    ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
+                    ,entry.getColor()
+                    ,entry.getId()
+            ));
+        });
 
-                imageContainer.add(new ModelsViewCard(file.getName()
-                        //"https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80")
-                        ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
-//                        "frontend/img/Bathroom/Bathtub/Antonio Lupi SUITE.jpeg"
-                        ,entry.getKey().getColor()
-                        ,entry.getKey().getId()
-                ));
-
-//                System.out.println("File: " + file.getAbsolutePath());
-//                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
-
+//        for (Map.Entry<MainLayout.PicFolder,String> entry : MainLayout.getMainLayout().getFilesMap().entrySet() ) {
+//            if(!entry.getValue().contains(parentFullPath)){
+//                continue;
 //            }
-        }
+//
+//                File file = new File(entry.getKey().getFullPath());
+//
+//                imageContainer.add(new ModelsViewCard(file.getName()
+//                        //"https://images.unsplash.com/photo-1519681393784-d120267933ba?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=80")
+//                        ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
+////                        "frontend/img/Bathroom/Bathtub/Antonio Lupi SUITE.jpeg"
+//                        ,entry.getKey().getColor()
+//                        ,entry.getKey().getId()
+//                ));
+//
+////                System.out.println("File: " + file.getAbsolutePath());
+////                filesMap.put(file.getAbsolutePath(), parent.getAbsolutePath());
+//
+////            }
+//        }
 
     }
 
