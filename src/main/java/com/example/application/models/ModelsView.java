@@ -254,12 +254,18 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
 
                 int n = 0;
 
+                VerticalLayout projectLayout = (VerticalLayout)componentDropEvent.getSource();
+
                 int projectId = Integer.parseInt(componentDropEvent.getSource().getId().get().replace("projectLayout",""));
                 Label label = (Label)Service.findComponentWithId(rightContainer, "labelFiles" + fileExt.replace(".","") + projectId);
                 if (label == null){
                     label = (Label)Service.findComponentWithId(rightContainer, "labelFiles" + projectId);
-                    if (!label.getText().equals("No files added")){
+                    if (label != null && !label.getText().equals("No files added")){
                         n = Integer.parseInt(label.getText().replace("labelFiles",""));
+                    } else if (label == null) {
+                        label = new Label();
+                        label.setId("labelFiles" + fileExt.replace(".","") + projectId);
+                        projectLayout.add(label);
                     }
                 } else {
                     if (!label.getText().equals("No files added")){
