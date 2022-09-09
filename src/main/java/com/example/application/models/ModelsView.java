@@ -157,6 +157,9 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
     public void refreshImages(String parentFullPath){
         imageContainer.removeAll();
 
+        imageContainer.setSizeFull();
+        imageContainer.getStyle().set("grid-template-columns","repeat(4, 1fr)");
+
         String absoluteImagesPath = new File("img").getAbsolutePath();
 
         List<MainLayout.PicFolder> list = new ArrayList();
