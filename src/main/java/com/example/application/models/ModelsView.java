@@ -5,6 +5,7 @@ import com.example.application.views.MainLayout;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.dnd.DropEvent;
 import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.html.H2;
@@ -12,8 +13,11 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.html.Main;
 import com.vaadin.flow.component.html.OrderedList;
 import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -220,6 +224,8 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         rightContainer.setWidth("auto");
         rightContainer.setHeight(leftContainer.getHeight());
 
+
+
 //        DropTarget.create(rightContainer).addDropListener(new ComponentEventListener<DropEvent<VerticalLayout>>() {
 //            @Override
 //            public void onComponentEvent(DropEvent<VerticalLayout> verticalLayoutDropEvent) {
@@ -316,24 +322,24 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         });
     }
 
-//    void refreshProjectTree(){
-//        treeGrid.setItems(getStaff(null), this::getStaff);
-//    }
-
     public List<Projects> getStaff(Projects parent) {
 
         if (parent == null) {
-//            for (Map.Entry<String,String> dir : dirsMap.entrySet()) {
-//                if (dir.getValue() == null) {
-//                    File file = new File(dir.getKey());
-////                    folders.add(new MainLayout.Projects(file.getName(), dir.getKey()));
-//                    folders.add(new Projects(file.getName(), dir.getKey()));
-//                }
-//            }
+
+
             List<Projects> folders = new ArrayList<>();
-            folders.add(new Projects(1,"Project 1"));
-            folders.add(new Projects(2,"Project 2"));
-            folders.add(new Projects(3,"Project 3"));
+try {
+                PreparedStatement stmt;
+                ResultSet rs = null;
+                String sql = "SELECT * FROM projects order by name";
+                stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+                rs = stmt.executeQuery();
+                while (rs.next()) {
+                    folders.add(new Projects(rs.getInt("id"), rs.getString("name")));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             return folders;
         } else {
             List<Projects> folders = new ArrayList<>();
@@ -365,6 +371,47 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         }
     }
 
+    void openProject(Projects project){
+        com.vaadin.flow.component.dialog.Dialog dialog = new Dialog();
+        dialog.setHeaderTitle("Project: " + project.getName());
+        dialog.setCloseOnOutsideClick(true);
+        dialog.setCloseOnEsc(true);
+        dialog.setModal(true);
+        dialog.setWidth("80em");
+        dialog.setHeight("40em");
+
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setSizeFull();
+
+        TextField nameField = new TextField("Project name");
+        nameField.setValue(project.getName());
+        verticalLayout.add(nameField);
+        verticalLayout.add(new TextArea("Project description"));
+
+        Button button = new Button();
+        button.setText("OK");
+        button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                dialog.close();
+            }
+        });
+        verticalLayout.add(button);
+
+        VerticalLayout verticalLayout2 = new VerticalLayout();
+        verticalLayout2.setSizeFull();
+        verticalLayout2.add(new Label("Files"));
+        verticalLayout2.add(new Label("File1.jpg"));
+        verticalLayout2.add(new Label("File2.jpg"));
+        verticalLayout2.add(new Label("File3.jpg"));
+
+        horizontalLayout.add(verticalLayout,verticalLayout2);
+        dialog.add(horizontalLayout);
+        dialog.open();
+    }
+
     HashMap<String,String> dirsMap = null;
     HashMap<String, String> filesMap = new HashMap<>();
     private void createTree(VerticalLayout rightContainer){
@@ -382,6 +429,12 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
                 Button button = new Button(project.getName());
                 button.setId("projectButton" + project.getId());
                 button.setWidth("100%");
+                button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+                    @Override
+                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                        openProject(project);
+                    }
+                });
 
                 Label labelFiles = new Label("No files added");
                 labelFiles.setId("labelFiles" + project.getId());
@@ -398,27 +451,6 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
             }
         }
 
-//        treeGrid = new TreeGrid<>();
-//        treeGrid.setId("projectsTree");
-////        treeGrid.getStyle().set("position", "fixed");
-////        treeGrid.getStyle().set("display", "content");
-//        treeGrid.setItems(getStaff(null), this::getStaff);
-//        treeGrid.addHierarchyColumn(Projects::getName).setHeader("Projects");
-//        treeGrid.setSelectionMode(TreeGrid.SelectionMode.SINGLE);
-//        treeGrid.setWidth("10em");
-
-//        treeGrid.addItemClickListener(new ComponentEventListener<ItemClickEvent<PicFolder>>() {
-//            @Override
-//            public void onComponentEvent(ItemClickEvent<PicFolder> PicFolderItemClickEvent) {
-//                ModelsView.getModelsView().getHeader().setText(PicFolderItemClickEvent.getItem().getName());
-//                ModelsView.getModelsView().refreshImages(PicFolderItemClickEvent.getItem().getFullPath());
-//            }
-//        });
-
-//        treeGrid.addColumn(PicFolder::getfullPath).setHeader("Last name");
-//        treeGrid.addColumn(PicFolder::getEmail).setHeader("Email");
-
-//        return treeGrid;
     }
 
 
