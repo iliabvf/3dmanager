@@ -1,23 +1,26 @@
 package com.example.application.models;
 
 public class Projects{
-    Integer id;
+    int id;
     String name;
 
-    public Projects(Integer id,String name) {
+    public Projects(int id,String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public Projects() {
     }
 
     public String getName() {
         return name;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(int id) {
         this.id = id;
     }
 

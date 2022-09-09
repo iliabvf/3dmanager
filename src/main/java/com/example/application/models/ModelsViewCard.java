@@ -38,11 +38,17 @@ public class ModelsViewCard extends ListItem {
 
     public List<String> tagsList = new ArrayList<>();
 
+    String fullFileName;
+
     public String getText() {
         return text;
     }
     public String getFileName() {
         return fileName;
+    }
+
+    public String getFullFileName() {
+        return fullFileName;
     }
 
     void fillDivTags(){
@@ -151,7 +157,19 @@ public class ModelsViewCard extends ListItem {
             }
         });
 
-        divTags.add(badge, colorBadge);
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setMargin(false);
+        horizontalLayout.setPadding(false);
+        horizontalLayout.add(badge, colorBadge);
+
+        HorizontalLayout horizontalLayoutTags = new HorizontalLayout();
+        horizontalLayoutTags.add(buttonAddTag);
+
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.setMargin(false);
+        verticalLayout.setPadding(false);
+        verticalLayout.add(horizontalLayout, horizontalLayoutTags);
+        divTags.add(verticalLayout);
 
         // Add custom tags
         try {
@@ -166,22 +184,22 @@ public class ModelsViewCard extends ListItem {
                 Span tagBadge = new Span();
                 tagBadge.getElement().setAttribute("theme", "badge");
                 tagBadge.setText(rs.getString("name"));
-                divTags.add(tagBadge);
+                horizontalLayoutTags.add(tagBadge);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        divTags.add(buttonAddTag);
 
 
     }
 
-    public ModelsViewCard(String fileName, String url, java.awt.Color colorTag, int foundPicFolderId) {
+    public ModelsViewCard(String fileName, String url, java.awt.Color colorTag, int foundPicFolderId, String fullFileName) {
         this.fileName = fileName;
         this.text = fileName.replace(".jpg", "").replace(".png", "").replace(".jpeg", "").replace(".gif", "");
         this.foundPicFolderId = foundPicFolderId;
         this.colorTag = colorTag;
+        this.fullFileName = fullFileName;
 
         addClassNames("bg-contrast-5", "flex", "flex-col", "items-start", "p-m", "rounded-l");
 

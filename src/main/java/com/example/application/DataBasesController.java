@@ -213,6 +213,7 @@ public class DataBasesController {
                         "    id BIGINT NOT NULL AUTO_INCREMENT,\n" +
                         "    name TEXT,\n" +
                         "    fileName TEXT,\n" +
+                        "    fullFileName TEXT,\n" +
                         "    filePath TEXT,\n" +
                         "    color TEXT,\n" +
                         "    red INT,\n" +

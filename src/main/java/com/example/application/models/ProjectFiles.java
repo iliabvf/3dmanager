@@ -1,7 +1,10 @@
 package com.example.application.models;
 
-public class ProjectFiles extends Projects {
-    Integer project;
+public class ProjectFiles extends Projects{
+    int id;
+    int project;
+    String fullFileName;
+    String fileName;
 
     public Integer getProject() {
         return project;
@@ -11,7 +14,26 @@ public class ProjectFiles extends Projects {
         this.project = project;
     }
 
-    public ProjectFiles(Integer id, String name) {
-        super(id, name);
+    public String getFullFileName() {
+        return fullFileName;
+    }
+
+    public void setFullFileName(String fullFileName) {
+        this.fullFileName = fullFileName;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public ProjectFiles(int id, int project, String fullFileName, String fileName) {
+        this.id = id;
+        this.project = project;
+        this.fullFileName = fullFileName;
+        this.fileName = fileName;
     }
 }

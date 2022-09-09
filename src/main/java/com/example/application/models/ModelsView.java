@@ -99,23 +99,13 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
             stmt.setString(3, "%" + searchString + "%");
             rs = stmt.executeQuery();
             while (rs.next()) {
-//                searchList.add(new SearchItem(rs.getString("name"),rs.getInt("id"),"pictags"));
+                File file = new File(rs.getString("filePath"));
 
-//        for (Map.Entry<MainLayout.PicFolder,String> entry : MainLayout.getMainLayout().getFilesMap().entrySet() ) {
-//            if(!entry.getValue().contains(parentFullPath)){
-//                continue;
-//            }
-
-            File file = new File(rs.getString("filePath"));
-
-            imageContainer.add(new ModelsViewCard(rs.getString("fileName")
-                    ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
-                    ,new Color(rs.getInt("red"),rs.getInt("green"),rs.getInt("blue"))
-                    ,rs.getInt("id")
-            ));
-//
-//        }
-
+                imageContainer.add(new ModelsViewCard(rs.getString("fileName")
+                        , file.getAbsolutePath().replace(absoluteImagesPath, "img")
+                        , new Color(rs.getInt("red"), rs.getInt("green"), rs.getInt("blue"))
+                        , rs.getInt("id"), rs.getString("filePath")
+                ));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -171,6 +161,7 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
                     ,file.getAbsolutePath().replace(absoluteImagesPath, "img")
                     ,entry.getColor()
                     ,entry.getId()
+                    ,entry.getFullPath()
             ));
         });
 
@@ -237,67 +228,6 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
         rightContainer.setWidth("auto");
         rightContainer.setHeight(leftContainer.getHeight());
 
-
-
-//        DropTarget.create(rightContainer).addDropListener(new ComponentEventListener<DropEvent<VerticalLayout>>() {
-//            @Override
-//            public void onComponentEvent(DropEvent<VerticalLayout> verticalLayoutDropEvent) {
-//                if (verticalLayoutDropEvent.getDragSourceComponent().get() == null
-//                        || !(verticalLayoutDropEvent.getDragSourceComponent().get() instanceof ModelsViewCard)) {
-//                    return;
-//                }
-
-//                Dialog dialog = new Dialog();
-//                dialog.setCloseOnEsc(true);
-//                dialog.setCloseOnOutsideClick(true);
-//                dialog.setWidth("30em");
-//                dialog.setHeight("20em");
-//                dialog.setHeaderTitle("Please select a project");
-//
-//                ComboBox<Projects> comboBox = new ComboBox<>();
-//                List<Projects> projects = new ArrayList<>();
-//                projects.add(new Projects(1,"Project 1"));
-//                projects.add(new Projects(2,"Project 2"));
-//                projects.add(new Projects(3,"Project 3"));
-//                comboBox.setItems(projects);
-//
-//                Button button = new Button("Add");
-//                button.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-//                    @Override
-//                    public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-//                        if (comboBox.getValue() == null){
-//                            return;
-//                        }
-//
-//                        ModelsViewCard card = (ModelsViewCard) verticalLayoutDropEvent.getDragSourceComponent().get();
-//
-//
-//                        try {
-//                            PreparedStatement stmt;
-//                            ResultSet rs = null;
-//                            String sql = "INSERT INTO projectFiles (name,project) VALUES (?,?)";
-//                            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
-//                            stmt.setString(1, card.getText());
-//                            stmt.setInt(2, comboBox.getValue().getId());
-//                            stmt.execute();
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        refreshProjectTree();
-//
-//                        dialog.close();
-//                    }
-//                });
-//
-//                dialog.add(comboBox,button);
-//
-//                dialog.add();
-//                dialog.open();
-
-//            }
-//        });
-
         HorizontalLayout mainContainer = new HorizontalLayout();
 //        mainContainer.addClassNames("flex", "flex-col", "flex-1", "overflow-y-auto");
         mainContainer.setWidth("100%");
@@ -318,30 +248,53 @@ public class ModelsView extends Main implements HasComponents, HasStyle {
                     return;
                 }
 
+                // adding files
                 ModelsViewCard card = (ModelsViewCard)componentDropEvent.getDragSourceComponent().get();
                 String fileExt = card.getFileName().substring(card.getFileName().lastIndexOf("."));
 
-                int projectId = Integer.parseInt(componentDropEvent.getSource().getId().get().replace("projectLayout",""));
-                Label label = (Label)Service.findComponentWithId(rightContainer, "labelFiles" + projectId);
-
                 int n = 0;
-                if (!label.getText().equals("No files added")){
-                    n = Integer.parseInt(label.getText().substring(label.getText().lastIndexOf("(")).replace("(", "").replace(")", ""));
+
+                int projectId = Integer.parseInt(componentDropEvent.getSource().getId().get().replace("projectLayout",""));
+                Label label = (Label)Service.findComponentWithId(rightContainer, "labelFiles" + fileExt.replace(".","") + projectId);
+                if (label == null){
+                    label = (Label)Service.findComponentWithId(rightContainer, "labelFiles" + projectId);
+                    if (!label.getText().equals("No files added")){
+                        n = Integer.parseInt(label.getText().replace("labelFiles",""));
+                    }
+                } else {
+                    if (!label.getText().equals("No files added")){
+                        n = Integer.parseInt(label.getText().replace(fileExt.replace(".",""),"").replace(" ","").replace("files",""));
+                    }
+
                 }
+
                 n++;
 
                 label.setText(fileExt + "(" + n + ")");
+
+                // Write to database project files
+                try {
+                    PreparedStatement stmt;
+                    String sql = "INSERT INTO projectFiles (project,fullFileName,fileName) VALUES (?,?,?)";
+                    stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+                    stmt.setInt(1, projectId);
+                    stmt.setString(2, card.getFullFileName());
+                    stmt.setString(3, card.getFileName());
+                    stmt.execute();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
             }
         });
     }
 
-    public List<Projects> getStaff(Projects parent) {
+    public List<Projects> getProjectsAndFiles(Projects parent) {
 
         if (parent == null) {
 
-
             List<Projects> folders = new ArrayList<>();
-try {
+            try {
                 PreparedStatement stmt;
                 ResultSet rs = null;
                 String sql = "SELECT * FROM projects order by name";
@@ -365,7 +318,7 @@ try {
                     stmt.setInt(1, parent.getId());
                     rs = stmt.executeQuery();
                     while (rs.next()) {
-                        folders.add(new ProjectFiles(rs.getInt("id"),rs.getString("name")));
+                        folders.add(new ProjectFiles(rs.getInt("id"),rs.getInt("project"), rs.getString("fullFileName"), rs.getString("fileName")));
 //                    picFolders.put(rs.getString("filePath"), new MainLayout.PicFolder(rs.getString("fileName"), rs.getString("filePath"), new Color(rs.getInt("red"), rs.getInt("green"), rs.getInt("blue"))));
                     }
                 } catch (Exception e) {
@@ -415,10 +368,26 @@ try {
 
         VerticalLayout verticalLayout2 = new VerticalLayout();
         verticalLayout2.setSizeFull();
-        verticalLayout2.add(new Label("Files"));
-        verticalLayout2.add(new Label("File1.jpg"));
-        verticalLayout2.add(new Label("File2.jpg"));
-        verticalLayout2.add(new Label("File3.jpg"));
+
+        verticalLayout2.add(new Label("Files:"));
+        try {
+            PreparedStatement stmt;
+            ResultSet rs = null;
+            String sql = "SELECT * FROM projectFiles WHERE project = ?";
+            stmt = MainLayout.getMainLayout().getDataBasesController().getHsqlConnection().prepareStatement(sql);
+            stmt.setInt(1, project.getId());
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                verticalLayout2.add(new Label(rs.getString("fileName")));
+//                folders.add(new Projects(rs.getInt("id"),rs.getString("name")));
+//                    picFolders.put(rs.getString("filePath"), new MainLayout.PicFolder(rs.getString("fileName"), rs.getString("filePath"), new Color(rs.getInt("red"), rs.getInt("green"), rs.getInt("blue"))));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+//        verticalLayout2.add(new Label("File2.jpg"));
+//        verticalLayout2.add(new Label("File3.jpg"));
 
         horizontalLayout.add(verticalLayout,verticalLayout2);
         dialog.add(horizontalLayout);
@@ -430,7 +399,7 @@ try {
     private void createTree(VerticalLayout rightContainer){
         rightContainer.removeAll();
 
-        for (Projects project : getStaff(null)) {
+        for (Projects project : getProjectsAndFiles(null)) {
             if (project instanceof Projects){
 
                 VerticalLayout projectContainer = new VerticalLayout();
@@ -449,18 +418,46 @@ try {
                     }
                 });
 
-                Label labelFiles = new Label("No files added");
-                labelFiles.setId("labelFiles" + project.getId());
 
-                HorizontalLayout horizontalLayout = new HorizontalLayout();
-                horizontalLayout.setWidth("10em");
-                horizontalLayout.add(new Label("..."),labelFiles);
-
-                projectContainer.add(button,horizontalLayout);
+                projectContainer.add(button);
 
                 rightContainer.add(projectContainer);
 
                 addDropListener(projectContainer);
+
+                // Add files
+                HashMap<String,Integer> extCounts = new HashMap<>();
+                for (Projects projectFile : getProjectsAndFiles(project)){
+                    if (projectFile instanceof ProjectFiles){
+                        ProjectFiles projectFiles = (ProjectFiles) projectFile;
+                        String ext = projectFiles.getFileName().substring(projectFiles.getFileName().lastIndexOf(".")+1);
+                        if (extCounts.containsKey(ext)){
+                            extCounts.put(ext,extCounts.get(ext)+1);
+                        } else {
+                            extCounts.put(ext,1);
+                        }
+                    }
+                }
+                if (extCounts.entrySet().size() == 0) {
+                    Label labelFiles = new Label("No files added");
+                    labelFiles.setId("labelFiles" + project.getId());
+                    HorizontalLayout horizontalLayout = new HorizontalLayout();
+                    horizontalLayout.setWidth("10em");
+                    horizontalLayout.add(new Label("..."), labelFiles);
+                    projectContainer.add(horizontalLayout);
+                } else {
+                    for (Map.Entry<String,Integer> extCount : extCounts.entrySet()){
+                        Label labelFiles = new Label();
+                        labelFiles.setId("labelFiles" + extCount.getKey() + project.getId());
+                        labelFiles.setText(extCount.getValue() + " " + extCount.getKey() + " files");
+
+                        HorizontalLayout horizontalLayout = new HorizontalLayout();
+                        horizontalLayout.setWidth("10em");
+                        horizontalLayout.add(new Label("..."), labelFiles);
+                        projectContainer.add(horizontalLayout);
+                    }
+                }
+
             }
         }
 
